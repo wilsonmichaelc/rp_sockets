@@ -8,6 +8,7 @@
 
 #include "connection_handler.h"
 #include "acquire_to_socket.h"
+#include "generate_arbitrary_waveform.h"
 #include "in_array.h"
 
 /*
@@ -117,7 +118,9 @@ void *connection_handler(void *socket_desc)
             general_buffer[bytesRead] = '\0';
 
             /* Make sure user sent us a valid channel */
-            if( !in_array( general_buffer, valid_channels ) ) {
+            char channel[bytesRead];
+            strcpy(channel, general_buffer);
+            if( !in_array( channel, valid_channels ) ) {
                 write(sock, error, strlen(error));
                 continue;
             }
@@ -155,20 +158,20 @@ void *connection_handler(void *socket_desc)
             /* Get the waveform */
             const int size = 16384;
             write(sock, input_waveform, strlen(input_waveform));
-            bytesRead = read(sock, general_buffer, );
+            bytesRead = read(sock, general_buffer, size);
             general_buffer[bytesRead] = '\0';
 
             /* 
                 Make sure user sent us a valid waveform 
                 Size is 16 * 1024 of floats.
             */
-            int i;
-            float waveform[size];
-            for(i=0; i<size; i++){
-                waveform[i] = atof(general_buffer[i]);
-            }
+            //int i;
+            //float waveform[size];
+            //for(i=0; i<size; i++){
+            //    waveform[i] = atof(general_buffer[i]);
+            //}
 
-            generate_arbitrary_waveform(channel, amplitude, frequency, waveform);
+            //generate_arbitrary_waveform(channel, amplitude, frequency, waveform);
 
         }else{
 
