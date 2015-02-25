@@ -27,11 +27,12 @@ void *connection_handler(void *socket_desc)
 
     /* Messages */
     static const char input_channel[] = "Select a channel (RP_CH_1, RP_CH_2, RP_CH_ALL): ";
-    //static const char input_frequency[] = "Select a frequency (0.0 - 6.2e+07 Hz): ";
-    //static const char input_amplitude[] = "Select an amplitude (0.0-2.0 Vpp): ";
+    static const char input_frequency[] = "Select a frequency (0.0 - 6.2e+07 Hz): ";
+    static const char input_amplitude[] = "Select an amplitude (0.0-2.0 Vpp): ";
     static const char imput_sample_rate[] = "Select sample rate (RP_SMP_125M, RP_SMP_15_625M, RP_SMP_1_953M, RP_SMP_122_070K, RP_SMP_15_258K, RP_SMP_1_907K) : ";
     static const char input_trigger[] = "Select a trigger (RP_TRIG_SRC_NOW, RP_TRIG_SRC_CHA_PE, RP_TRIG_SRC_CHA_NE, RP_TRIG_SRC_CHB_PE, RP_TRIG_SRC_CHB_NE): ";
-    static const char error[] = "Invalid input detected. Start over.\n";
+    static const char input_waveform[] = "Send a waveform: ";
+    static const char error[] = "Invalid input detected. Start over. \n";
 
     const char *valid_channels[] = {"RP_CH_1", "RP_CH_2", "RP_CH_ALL"};
     const char *valid_triggers[] = {"RP_TRIG_SRC_NOW", "RP_TRIG_SRC_CHA_PE", "RP_TRIG_SRC_CHA_NE", "RP_TRIG_SRC_CHB_PE", "RP_TRIG_SRC_CHB_NE"}; 
@@ -106,9 +107,68 @@ void *connection_handler(void *socket_desc)
 
         }else if( read_size >= (sizeof(generate_arb) - 1) && memcmp(client_message, generate_arb, (sizeof(generate_arb) - 1) ) == 0 ){
 
-            /* Request the channel (1/2), amplitude (0.0-2.0), frequency () */
-            char response[] = "Not implemented yet... \n";
-            write(sock , response , strlen(response));
+            /* 
+                Request the channel (1/2), amplitude (0.0-2.0), frequency () 
+            */
+
+            /* Get the channel */
+            write(sock, input_channel, strlen(input_channel));
+            bytesRead = read(sock, general_buffer, 1024);
+            general_buffer[bytesRead] = '\0';
+
+            /* Make sure user sent us a valid channel */
+            if( !in_array( general_buffer, valid_channels ) ) {
+                write(sock, error, strlen(error));
+                continue;
+            }
+
+            /* Get the frequency */
+            write(sock, input_frequency, strlen(input_frequency));
+            bytesRead = read(sock, general_buffer, 1024);
+            general_buffer[bytesRead] = '\0';
+
+            /* 
+                Make sure user sent us a valid frequency 
+                0.0 - 6.2e+07 Hz
+            */
+            double frequency = strtod(general_buffer,NULL);
+            if( (frequency < 0.0) || (frequency > 62000000) ) {
+                write(sock, error, strlen(error));
+                continue;
+            }
+
+            /* Get the amplitude */
+            write(sock, input_amplitude, strlen(input_amplitude));
+            bytesRead = read(sock, general_buffer, 1024);
+            general_buffer[bytesRead] = '\0';
+
+            /* 
+                Make sure user sent us a valid amplitude 
+                0.0 - 2.0 Vpp
+            */
+            double amplitude = strtod(general_buffer,NULL);
+            if( (amplitude < 0.0) || (amplitude > 2.0) ) {
+                write(sock, error, strlen(error));
+                continue;
+            }
+
+            /* Get the waveform */
+            const int size = 16384;
+            write(sock, input_waveform, strlen(input_waveform));
+            bytesRead = read(sock, general_buffer, );
+            general_buffer[bytesRead] = '\0';
+
+            /* 
+                Make sure user sent us a valid waveform 
+                Size is 16 * 1024 of floats.
+            */
+            int i;
+            float waveform[size];
+            for(i=0; i<size; i++){
+                waveform[i] = atof(general_buffer[i]);
+            }
+
+            generate_arbitrary_waveform(channel, amplitude, frequency, waveform);
 
         }else{
 
