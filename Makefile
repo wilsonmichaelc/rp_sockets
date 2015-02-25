@@ -19,13 +19,13 @@ RP_LIB_INCLUDE = -L include/ -lm -lpthread -lrp
 #Cross compiler definition
 CC = $(CROSS_COMPILE)gcc
 #Flags
-CFLAGS = -g -std=gnu99 -Wall -Werror -pthread
+CFLAGS = -g -std=gnu99 -Wall -Werror
 #Objects
-OBJECTS = server.o
+OBJECTS = server.o connection_handler.o acquire_to_socket.o
 #Target file
 TARGET = server
 #Dependancies
-#DEPS = server.h
+DEPS = server.h connection_handler.h acquire_to_socket.h
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(RP_LIB_INCLUDE)
