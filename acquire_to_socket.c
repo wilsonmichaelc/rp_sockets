@@ -3,8 +3,10 @@
 #include <stdlib.h>    //strlen
 #include <sys/socket.h>
 #include <unistd.h>    //write
-#include <pthread.h> //for threading , link with lpthread
+#include <pthread.h>
 #include <rp.h>
+
+#include "acquire_to_socket.h"
 
 void *acquire_to_socket(void *socket_desc){
 

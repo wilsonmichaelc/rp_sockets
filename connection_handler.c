@@ -3,8 +3,12 @@
 #include <stdlib.h>    //strlen
 #include <sys/socket.h>
 #include <unistd.h>    //write
-#include <pthread.h> //for threading , link with lpthread
+#include <pthread.h>
 #include <rp.h>
+
+#include "connection_handler.h"
+#include "acquire_to_socket.h"
+#include "in_array.h"
 
 /*
  * This will handle connection for each client
@@ -63,7 +67,7 @@ void *connection_handler(void *socket_desc)
             general_buffer[bytesRead] = '\0';
 
             /* Make sure user sent us a valid channel */
-            if( !inArray( general_buffer, valid_channels ) ) {
+            if( !in_array( general_buffer, valid_channels ) ) {
                 write(sock, error, strlen(error));
                 continue;
             }
@@ -74,7 +78,7 @@ void *connection_handler(void *socket_desc)
             general_buffer[bytesRead] = '\0';
 
             /* Make sure the user sent us a valid sample rate */
-            if( !inArray( general_buffer, valid_sample_rates ) ){
+            if( !in_array( general_buffer, valid_sample_rates ) ){
                 write(sock, error, strlen(error));
                 continue;
             }else{
@@ -87,7 +91,7 @@ void *connection_handler(void *socket_desc)
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
 
-            if( !inArray( general_buffer, valid_triggers ) ){
+            if( !in_array( general_buffer, valid_triggers ) ){
                 write(sock, error, strlen(error));
                 continue;
             }else{

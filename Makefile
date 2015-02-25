@@ -11,21 +11,21 @@ REVISION ?= devbuild
 CROSS_COMPILE = arm-linux-gnueabi-
 
 #Define header includes
-RP_PATH_INCLUDE = -I include/
+RP_PATH_INCLUDE = -I ../include/
 
 #Define library includes
-RP_LIB_INCLUDE = -L include/ -lm -lpthread -lrp
+RP_LIB_INCLUDE = -L ../include/ -lm -lpthread -lrp
 
 #Cross compiler definition
 CC = $(CROSS_COMPILE)gcc
 #Flags
 CFLAGS = -g -std=gnu99 -Wall -Werror
 #Objects
-OBJECTS = server.o connection_handler.o acquire_to_socket.o
+OBJECTS = server.o connection_handler.o acquire_to_socket.o in_array.o
 #Target file
 TARGET = server
 #Dependancies
-DEPS = server.h connection_handler.h acquire_to_socket.h
+DEPS = server.h connection_handler.h acquire_to_socket.h in_array.h
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(RP_LIB_INCLUDE)

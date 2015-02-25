@@ -5,18 +5,17 @@
 */
  
 #include <stdio.h>
-#include <string.h>    //strlen
-#include <stdlib.h>    //strlen
+#include <string.h>
+#include <stdlib.h>
 #include <sys/socket.h>
-#include <arpa/inet.h> //inet_addr
-#include <unistd.h>    //write
-#include <pthread.h> //for threading , link with lpthread
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <pthread.h>
 #include <stdbool.h>
 #include <rp.h>
- 
-/* In Array Function */
-bool inArray(char *val, const char *arr[]);
- 
+    
+#include "connection_handler.h"
+
 int main(int argc , char *argv[])
 {
     /* Print error, if rp_Init() function failed */
@@ -53,11 +52,6 @@ int main(int argc , char *argv[])
     listen(socket_desc , 3);
      
     //Accept and incoming connection
-    //puts("Waiting for incoming connections...");
-    //c = sizeof(struct sockaddr_in);
-     
-     
-    //Accept and incoming connection
     puts("Waiting for incoming connections...");
     c = sizeof(struct sockaddr_in);
     pthread_t thread_id;
@@ -86,13 +80,3 @@ int main(int argc , char *argv[])
     return 0;
 }
 
-bool inArray(char *val, const char *arr[]){
-    int i;
-    int size = sizeof(arr) / sizeof(arr[0]);
-    for (i=0; i < size; i++) {
-        if( memcmp(val, arr[i], (sizeof(arr[i]) - 1) ) == 0 ){
-            return true;
-        }            
-    }
-    return false;
-}
