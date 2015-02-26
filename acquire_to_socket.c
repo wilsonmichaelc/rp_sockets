@@ -1,17 +1,18 @@
 #include <stdio.h>
-#include <string.h>    //strlen
-#include <stdlib.h>    //strlen
+#include <string.h>
+#include <stdlib.h>
 #include <sys/socket.h>
-#include <unistd.h>    //write
+#include <unistd.h>
 #include <pthread.h>
 #include <rp.h>
 
 #include "acquire_to_socket.h"
 
-void *acquire_to_socket(void *socket_desc){
+void *acquire_to_socket(acq_params *parameters){
 
     /* Get the socket */
-    int sock = *(int*)socket_desc;
+    acq_params params = *parameters;
+    int sock = *(int*)params.socket;
 
     /* Create buffer and size to hold data points */
     uint32_t array_size = 16 * 1024; 
@@ -29,6 +30,9 @@ void *acquire_to_socket(void *socket_desc){
     for (i = 0; i < array_size; ++i)
     {
         send(sock, &buff[i], sizeof(float), 0);
+        
+        //write(sock, buff[i], strlen(buff[i]));
+
     }
 
     /* Releasing resources */

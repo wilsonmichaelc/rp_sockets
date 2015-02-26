@@ -4,42 +4,18 @@
 #include <errno.h>
 #include <rp.h>
 
+#include "generate_arbitrary_waveform.h"
+
 const int buff_size = 16384;
 
-void generate_arbitrary_waveform(char channel, double amplitude, double frequency, float *waveform[]){
+void generate_arbitrary_waveform(gen_params *parameters){
 
-    float ch_arb[buff_size];
+    gen_params params = *parameters;
 
-    if(channel == 1){
-
-        rp_GenWaveform(RP_CH_1, RP_WAVEFORM_ARBITRARY);
-        rp_GenArbWaveform(RP_CH_1, ch_arb, buff_size);
-        rp_GenAmp(RP_CH_1, amplitude);
-        rp_GenFreq(RP_CH_1, frequency);
-        rp_GenOutEnable(RP_CH_1);
-
-    }else if(channel == 2){
-
-        rp_GenWaveform(RP_CH_2, RP_WAVEFORM_ARBITRARY);
-        rp_GenArbWaveform(RP_CH_2, ch_arb, buff_size);
-        rp_GenAmp(RP_CH_2, amplitude);
-        rp_GenFreq(RP_CH_2, frequency);
-        rp_GenOutEnable(RP_CH_2);
-
-    }else{
-
-        rp_GenWaveform(RP_CH_1, RP_WAVEFORM_ARBITRARY);
-        rp_GenArbWaveform(RP_CH_1, ch_arb, buff_size);
-        rp_GenAmp(RP_CH_1, amplitude);
-        rp_GenFreq(RP_CH_1, frequency);
-        rp_GenOutEnable(RP_CH_1);
-
-        rp_GenWaveform(RP_CH_2, RP_WAVEFORM_ARBITRARY);
-        rp_GenArbWaveform(RP_CH_2, ch_arb, buff_size);
-        rp_GenAmp(RP_CH_2, amplitude);
-        rp_GenFreq(RP_CH_2, frequency);
-        rp_GenOutEnable(RP_CH_2);
-
-    }
+    rp_GenWaveform(params.channel, RP_WAVEFORM_ARBITRARY);
+    rp_GenArbWaveform(params.channel, params.waveform, buff_size);
+    rp_GenAmp(params.channel, params.amplitude);
+    rp_GenFreq(params.channel, params.frequency);
+    rp_GenOutEnable(params.channel);
 
 }
