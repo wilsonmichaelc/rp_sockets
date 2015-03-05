@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>    //strlen
 #include <stdlib.h>    //strlen
+#include <ctype.h>
 #include <sys/socket.h>
 #include <unistd.h>    //write
 #include <pthread.h>
@@ -30,12 +31,13 @@ void *connection_handler(void *socket_desc)
 
     /* Messages */
     static const char input_channel[] = "Select a channel (RP_CH_1, RP_CH_2): ";
+    static const char input_acq_len[] = "How many point would you like to acquire (0=continuous): ";
     static const char input_frequency[] = "Select a frequency (0.0 - 6.2e+07 Hz): ";
     static const char input_amplitude[] = "Select an amplitude (0.0-2.0 Vpp): ";
     static const char imput_sample_rate[] = "Select sample rate (RP_SMP_125M, RP_SMP_15_625M, RP_SMP_1_953M, RP_SMP_122_070K, RP_SMP_15_258K, RP_SMP_1_907K) : ";
     static const char input_trigger[] = "Select a trigger (RP_TRIG_SRC_NOW, RP_TRIG_SRC_CHA_PE, RP_TRIG_SRC_CHA_NE, RP_TRIG_SRC_CHB_PE, RP_TRIG_SRC_CHB_NE): ";
-    static const char input_waveform[] = "Send a waveform: ";
-    static const char error[] = "Invalid input detected. Start over. \n";
+    //static const char input_waveform[] = "Send a waveform: ";
+    static const char error[] = "invalid input.";
 
     const char *valid_channels[] = {"RP_CH_1", "RP_CH_2"};
     const char *valid_triggers[] = {"RP_TRIG_SRC_NOW", "RP_TRIG_SRC_CHA_PE", "RP_TRIG_SRC_CHA_NE", "RP_TRIG_SRC_CHB_PE", "RP_TRIG_SRC_CHB_NE"}; 
@@ -53,13 +55,18 @@ void *connection_handler(void *socket_desc)
         client_message[read_size] = '\0';
         memset(general_buffer, 0, 1024);
 
+        // QUIT
         if( read_size >= (sizeof(quit) - 1) && memcmp(client_message, quit, (sizeof(quit) - 1) ) == 0 ) {
             
             /* Exit */
+            rp_GenOutDisable(RP_CH_1);
+            rp_GenOutDisable(RP_CH_2);
+
             close(sock);
             read_size = 0;
             break;
 
+        // ACQUIRE
         }else if( read_size >= (sizeof(acquire) - 1) && memcmp(client_message, acquire, (sizeof(acquire) - 1) ) == 0 ){
             
             /* 
@@ -76,7 +83,7 @@ void *connection_handler(void *socket_desc)
             /* Make sure user sent us a valid channel */
             int channel = in_array( general_buffer, valid_channels );
             if( channel == -1 ) {
-                write(sock, error, strlen(error));
+                write(sock, "Invalid Channel Number.\n", strlen("Invalid Channel Number.\n"));
                 continue;
             }else{
                 params.channel = (rp_channel_t)channel;
@@ -90,7 +97,7 @@ void *connection_handler(void *socket_desc)
             /* Make sure the user sent us a valid sample rate */
             int sample_rate = in_array( general_buffer, valid_sample_rates );
             if( sample_rate == -1 ){
-                write(sock, error, strlen(error));
+                write(sock, "Invalid sample rate.\n", strlen("Invalid sample rate.\n"));
                 continue;
             }else{
                 params.sample_rate = (rp_acq_sampling_rate_t)sample_rate;
@@ -103,10 +110,26 @@ void *connection_handler(void *socket_desc)
 
             int trigger = in_array( general_buffer, valid_triggers );
             if( trigger == -1 ){
-                write(sock, error, strlen(error));
+                write(sock, "Invalid trigger.\n", strlen("Invalid trigger.\n"));
                 continue;
             }else{
                 params.trigger = (rp_acq_trig_src_t)trigger;
+            }
+
+            /* How many points are we acquiring? */
+            write(sock, input_acq_len, strlen(input_acq_len));
+            bytesRead = read(sock, general_buffer, 1024);
+            general_buffer[bytesRead] = '\0';
+
+            char tmp_pts[bytesRead + 1];
+            strncpy(tmp_pts, general_buffer, bytesRead);
+            int points = atoi(tmp_pts);
+
+            if(points != 0){
+                params.num_points = points;
+            }else{
+                write(sock, "Invalid num points.\n", strlen("Invalid num points.\n"));
+                continue;
             }
 
             params.socket = &sock;
@@ -170,19 +193,11 @@ void *connection_handler(void *socket_desc)
                 params.amplitude = amplitude;
             }
 
-            /* Get the waveform */
-            const int size = 16384;
-            write(sock, input_waveform, strlen(input_waveform));
-            bytesRead = read(sock, general_buffer, size);
-            general_buffer[bytesRead] = '\0';
+            /* Get the waveform to generate */
+            //write(sock, input_waveform, strlen(input_waveform));
 
-            /* 
-                Make sure user sent us a valid waveform 
-                Size is 16 * 1024 of floats.
-            */
-            //float empty[size];
-            //params.waveform = atof(general_buffer);
-            //params.waveform = empty;
+            // READ IN ARB WAVEFORM HERE
+
             generate_arbitrary_waveform(&params);
 
         }else{

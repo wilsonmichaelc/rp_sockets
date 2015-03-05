@@ -3,7 +3,6 @@
 
 typedef struct gen_params_tag
 {
-    int socket;
     rp_channel_t channel;
     double frequency;
     double amplitude;

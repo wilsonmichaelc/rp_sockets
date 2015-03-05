@@ -2,6 +2,7 @@
     C socket server example, handles multiple clients using threads
     Compile
     gcc server.c -lpthread -o server
+    Dont forget to export ... export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lib
 */
  
 #include <stdio.h>
