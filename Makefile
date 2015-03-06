@@ -21,11 +21,11 @@ CC = $(CROSS_COMPILE)gcc
 #Flags
 CFLAGS = -g -std=gnu99 -Wall -Werror
 #Objects
-OBJECTS = server.o connection_handler.o acquire_to_socket.o in_array.o generate_arbitrary_waveform.o
+OBJECTS = server.o connection_handler.o acquire_to_socket.o str_to_enum.o generate_arbitrary_waveform.o
 #Target file
 TARGET = server
 #Dependancies
-DEPS = server.h connection_handler.h acquire_to_socket.h in_array.h generate_arbitrary_waveform.h
+DEPS = server.h connection_handler.h acquire_to_socket.h str_to_enum.h generate_arbitrary_waveform.h
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(RP_LIB_INCLUDE)

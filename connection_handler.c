@@ -8,9 +8,8 @@
 #include <rp.h>
 
 #include "acquire_to_socket.h"
-//#include "connection_handler.h"
 #include "generate_arbitrary_waveform.h"
-#include "in_array.h"
+#include "str_to_enum.h"
 
 void *connection_handler(void *);
 
@@ -36,12 +35,7 @@ void *connection_handler(void *socket_desc)
     static const char input_amplitude[] = "Select an amplitude (0.0-2.0 Vpp): ";
     static const char imput_sample_rate[] = "Select sample rate (RP_SMP_125M, RP_SMP_15_625M, RP_SMP_1_953M, RP_SMP_122_070K, RP_SMP_15_258K, RP_SMP_1_907K) : ";
     static const char input_trigger[] = "Select a trigger (RP_TRIG_SRC_NOW, RP_TRIG_SRC_CHA_PE, RP_TRIG_SRC_CHA_NE, RP_TRIG_SRC_CHB_PE, RP_TRIG_SRC_CHB_NE): ";
-    //static const char input_waveform[] = "Send a waveform: ";
-    static const char error[] = "invalid input.";
-
-    const char *valid_channels[] = {"RP_CH_1", "RP_CH_2"};
-    const char *valid_triggers[] = {"RP_TRIG_SRC_NOW", "RP_TRIG_SRC_CHA_PE", "RP_TRIG_SRC_CHA_NE", "RP_TRIG_SRC_CHB_PE", "RP_TRIG_SRC_CHB_NE"}; 
-    const char *valid_sample_rates[] = {"RP_SMP_125M", "RP_SMP_15_625M", "RP_SMP_1_953M", "RP_SMP_122_070K", "RP_SMP_15_258K", "RP_SMP_1_907K"}; 
+    static const char error[] = "invalid input."; 
 
     char general_buffer[1024];
 
@@ -79,42 +73,19 @@ void *connection_handler(void *socket_desc)
             write(sock, input_channel, strlen(input_channel));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
-
-            /* Make sure user sent us a valid channel */
-            int channel = in_array( general_buffer, valid_channels );
-            if( channel == -1 ) {
-                write(sock, "Invalid Channel Number.\n", strlen("Invalid Channel Number.\n"));
-                continue;
-            }else{
-                params.channel = (rp_channel_t)channel;
-            }
+            params.channel = getChannel(general_buffer);
             
             /* Get the sample rate */
             write(sock, imput_sample_rate, strlen(imput_sample_rate));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
-
-            /* Make sure the user sent us a valid sample rate */
-            int sample_rate = in_array( general_buffer, valid_sample_rates );
-            if( sample_rate == -1 ){
-                write(sock, "Invalid sample rate.\n", strlen("Invalid sample rate.\n"));
-                continue;
-            }else{
-                params.sample_rate = (rp_acq_sampling_rate_t)sample_rate;
-            }
+            params.sample_rate = getSampleRate(general_buffer);
 
             /* Get the trigger */
             write(sock, input_trigger, strlen(input_trigger));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
-
-            int trigger = in_array( general_buffer, valid_triggers );
-            if( trigger == -1 ){
-                write(sock, "Invalid trigger.\n", strlen("Invalid trigger.\n"));
-                continue;
-            }else{
-                params.trigger = (rp_acq_trig_src_t)trigger;
-            }
+            params.trigger = getTrigger(general_buffer);
 
             /* How many points are we acquiring? */
             write(sock, input_acq_len, strlen(input_acq_len));
@@ -149,15 +120,7 @@ void *connection_handler(void *socket_desc)
             write(sock, input_channel, strlen(input_channel));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
-
-            /* Make sure user sent us a valid channel */
-            int channel = in_array( general_buffer, valid_channels );
-            if( channel == -1 ) {
-                write(sock, error, strlen(error));
-                continue;
-            }else{
-                params.channel = (rp_channel_t)channel;
-            }
+            params.channel = getChannel(general_buffer);
 
             /* Get the frequency */
             write(sock, input_frequency, strlen(input_frequency));
