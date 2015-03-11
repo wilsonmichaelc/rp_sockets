@@ -5,33 +5,39 @@
 #include <rp.h>
 
 #include "generate_arbitrary_waveform.h"
-
-const int buff_size = 16*1024;
-
-int read_in_file(float *ch_data);
+const int buff_size = 16384;
 
 void generate_arbitrary_waveform(gen_params *parameters){
 
     gen_params params = *parameters;
     double frequency = (double)params.frequency;
     double amplitude = (double)params.amplitude;
-    float waveform[buff_size];
+    //rp_channel_t channel = (rp_channel_t)params.channel;
 
-    read_in_file(waveform);
+    float ch_arb1[buff_size];
+    float ch_arb2[buff_size];
+    read_in_file(ch_arb1, "/tmp/waveform1.csv");
+    read_in_file(ch_arb2, "/tmp/waveform2.csv");
 
     rp_GenWaveform(RP_CH_1, RP_WAVEFORM_ARBITRARY);
-    rp_GenArbWaveform(RP_CH_1, waveform, buff_size);
+    rp_GenArbWaveform(RP_CH_1, ch_arb1, buff_size);
     rp_GenAmp(RP_CH_1, amplitude);
     rp_GenFreq(RP_CH_1, frequency);
+
+    rp_GenWaveform(RP_CH_2, RP_WAVEFORM_ARBITRARY);
+    rp_GenArbWaveform(RP_CH_2, ch_arb2, buff_size);
+    rp_GenAmp(RP_CH_2, amplitude);
+    rp_GenFreq(RP_CH_2, frequency);
+
     rp_GenOutEnable(RP_CH_1);
+    rp_GenOutEnable(RP_CH_2);
 
 }
 
-int read_in_file(float *ch_data)
+int read_in_file(float *ch_data, char file_path[])
 {
     FILE *fi = NULL;
     int i, read_size, samples_read = 0;
-    char file_path[] = "/tmp/batman.csv";
 
     /* open file */
     fi = fopen(file_path, "r+");

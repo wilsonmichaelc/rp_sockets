@@ -27,14 +27,16 @@ void *connection_handler(void *socket_desc)
     static const char quit[] = "EXIT";
     static const char acquire[] = "ACQUIRE";
     static const char generate_arb[] = "GENERATE_ARB";
+    static const char stop[] = "STOP";
 
     /* Messages */
-    static const char input_channel[] = "Select a channel (RP_CH_1, RP_CH_2): ";
+    static const char input_channel[] = "Select a channel (CH1, CH2): ";
     static const char input_acq_len[] = "How many point would you like to acquire (0=continuous): ";
-    static const char input_frequency[] = "Select a frequency (0.0 - 6.2e+07 Hz): ";
-    static const char input_amplitude[] = "Select an amplitude (0.0-2.0 Vpp): ";
-    static const char imput_sample_rate[] = "Select sample rate (RP_SMP_125M, RP_SMP_15_625M, RP_SMP_1_953M, RP_SMP_122_070K, RP_SMP_15_258K, RP_SMP_1_907K) : ";
-    static const char input_trigger[] = "Select a trigger (RP_TRIG_SRC_NOW, RP_TRIG_SRC_CHA_PE, RP_TRIG_SRC_CHA_NE, RP_TRIG_SRC_CHB_PE, RP_TRIG_SRC_CHB_NE): ";
+    //static const char input_frequency[] = "Select a frequency (0.0 - 6.2e+07 Hz): ";
+    //static const char input_amplitude[] = "Select an amplitude (0.0-2.0 Vpp): ";
+    static const char imput_sample_rate[] = "Select sample rate (125M, 15625M, 1953M, 122070K, 15258K, 1907K): ";
+    static const char input_trigger[] = "Select a trigger (NOW, CHA_PE, CHA_NE, CHB_PE, CHB_NE): ";
+    //static const char input_waveform[] = "Send 16384 floats: ";
     static const char error[] = "invalid input."; 
 
     char general_buffer[1024];
@@ -96,7 +98,7 @@ void *connection_handler(void *socket_desc)
             strncpy(tmp_pts, general_buffer, bytesRead);
             int points = atoi(tmp_pts);
 
-            if(points != 0){
+            if(points >= 0){
                 params.num_points = points;
             }else{
                 write(sock, "Invalid num points.\n", strlen("Invalid num points.\n"));
@@ -117,13 +119,13 @@ void *connection_handler(void *socket_desc)
             struct gen_params_tag params;
 
             /* Get the channel */
-            write(sock, input_channel, strlen(input_channel));
-            bytesRead = read(sock, general_buffer, 1024);
-            general_buffer[bytesRead] = '\0';
-            params.channel = getChannel(general_buffer);
+            //write(sock, input_channel, strlen(input_channel));
+            //bytesRead = read(sock, general_buffer, 1024);
+            //general_buffer[bytesRead] = '\0';
+            //params.channel = getChannel(general_buffer);
 
             /* Get the frequency */
-            write(sock, input_frequency, strlen(input_frequency));
+            //write(sock, input_frequency, strlen(input_frequency));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
 
@@ -140,7 +142,7 @@ void *connection_handler(void *socket_desc)
             }
 
             /* Get the amplitude */
-            write(sock, input_amplitude, strlen(input_amplitude));
+            //write(sock, input_amplitude, strlen(input_amplitude));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
 
@@ -157,12 +159,36 @@ void *connection_handler(void *socket_desc)
             }
 
             /* Get the waveform to generate */
-            //write(sock, input_waveform, strlen(input_waveform));
+            //bytesRead = read(sock, general_buffer, 1024);
+           // general_buffer[bytesRead] = '\0';
+            //int bytes_to_read = strtoi(general_buffer,NULL);
 
-            // READ IN ARB WAVEFORM HERE
+            //char waveform_buff[bytes_to_read];
+           // memset(waveform_buff, 0, bytes_to_read);
+           // bytesRead = read(sock, waveform_buff, bytes_to_read);
+           // waveform_buff[bytesRead] = '\0';
+
+           // int b;
+            //for(b=0; b<bytesRead; b+=4){
+
+            //    params.waveform[b] = strtof();
+            //}
+            //write(sock, input_waveform, strlen(input_waveform));
+            /*int c;
+            for(c=0; c<16384; c++){
+                bytesRead = read(sock, waveform_buff, 11);
+                waveform_buff[bytesRead] = '\0';
+                printf("bytesRead=%d \n", bytesRead);
+                printf("charsRead=%s \n", waveform_buff);
+                params.waveform[c] = strtof(waveform_buff,NULL);
+                printf("%f \n", params.waveform[c]);
+            }
+            */
 
             generate_arbitrary_waveform(&params);
 
+        }else if( read_size >= (sizeof(stop) - 1) && memcmp(client_message, stop, (sizeof(stop) - 1) ) == 0 ){
+            stop_continuous_acquisition = 1;
         }else{
 
             /* Send the message back to client */

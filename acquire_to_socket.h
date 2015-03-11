@@ -12,4 +12,6 @@ typedef struct acq_params_tag
 
 void *acquire_to_socket(acq_params *parameters);
 
+extern int stop_continuous_acquisition;
+
 #endif
