@@ -38,10 +38,10 @@ void *acquire_to_socket(acq_params *parameters){
             for (i = 0; i < array_size; ++i)
             {
                 //send(sock, &buff[i], sizeof(float), 0);
-                char tmp[1024];
+                char tmp[4];
                 sprintf(tmp, "%f", buff[i]);
                 write(sock, tmp, strlen(tmp));
-                write(sock, "\n", strlen("\n"));
+                write(sock, ",", strlen(","));
             }
         }
 

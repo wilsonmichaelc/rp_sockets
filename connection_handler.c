@@ -30,12 +30,12 @@ void *connection_handler(void *socket_desc)
     static const char stop[] = "STOP";
 
     /* Messages */
-    static const char input_channel[] = "Select a channel (CH1, CH2): ";
-    static const char input_acq_len[] = "How many point would you like to acquire (0=continuous): ";
+    //static const char input_channel[] = "Select a channel (CH1, CH2): ";
+    //static const char input_acq_len[] = "How many point would you like to acquire (0=continuous): ";
     //static const char input_frequency[] = "Select a frequency (0.0 - 6.2e+07 Hz): ";
     //static const char input_amplitude[] = "Select an amplitude (0.0-2.0 Vpp): ";
-    static const char imput_sample_rate[] = "Select sample rate (125M, 15625M, 1953M, 122070K, 15258K, 1907K): ";
-    static const char input_trigger[] = "Select a trigger (NOW, CHA_PE, CHA_NE, CHB_PE, CHB_NE): ";
+    //static const char imput_sample_rate[] = "Select sample rate (125M, 15625M, 1953M, 122070K, 15258K, 1907K): ";
+    //static const char input_trigger[] = "Select a trigger (NOW, CHA_PE, CHA_NE, CHB_PE, CHB_NE): ";
     //static const char input_waveform[] = "Send 16384 floats: ";
     static const char error[] = "invalid input."; 
 
@@ -72,25 +72,25 @@ void *connection_handler(void *socket_desc)
             struct acq_params_tag params;
 
             /* Get the channel */
-            write(sock, input_channel, strlen(input_channel));
+            //write(sock, input_channel, strlen(input_channel));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
             params.channel = getChannel(general_buffer);
             
             /* Get the sample rate */
-            write(sock, imput_sample_rate, strlen(imput_sample_rate));
+            //write(sock, imput_sample_rate, strlen(imput_sample_rate));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
             params.sample_rate = getSampleRate(general_buffer);
 
             /* Get the trigger */
-            write(sock, input_trigger, strlen(input_trigger));
+            //write(sock, input_trigger, strlen(input_trigger));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
             params.trigger = getTrigger(general_buffer);
 
             /* How many points are we acquiring? */
-            write(sock, input_acq_len, strlen(input_acq_len));
+            //write(sock, input_acq_len, strlen(input_acq_len));
             bytesRead = read(sock, general_buffer, 1024);
             general_buffer[bytesRead] = '\0';
 
